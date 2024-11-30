@@ -35,7 +35,7 @@ export class QueueCreator {
     const channels = new Collection(channelsContent).map(data => new ApiChannel(data))
 
     const queue = new Queue()
-    for (const channel of this.parsedChannels.all()) {
+    for (const channel of this.parsedChannels.all() as Channel[]) {
       if (!channel.site || !channel.site_id || !channel.name) continue
       if (this.options.lang && channel.lang !== this.options.lang) continue
 

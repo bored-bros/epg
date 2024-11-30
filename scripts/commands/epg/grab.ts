@@ -28,14 +28,15 @@ program
     1
   )
   .option('--cron <expression>', 'Schedule a script run (example: "0 0 * * *")')
-  .option('--gzip', 'Create a compressed version of the guide as well', false)
+  // .option('--xml', 'Create a XML version of the guide', true)
+  // .option('--json', 'Create a JSON version of the guide', false)
+  // .option('--gzip', 'Create a compressed version of the guide', false)
   .parse(process.argv)
 
 export type GrabOptions = {
   site?: string
   channels?: string
   output: string
-  gzip: boolean
   maxConnections: number
   timeout?: string
   delay?: string

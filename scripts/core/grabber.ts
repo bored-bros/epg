@@ -19,7 +19,6 @@ export class Grabber {
     this.logger = logger
     this.queue = queue
     this.options = options
-    this.grabber = process.env.NODE_ENV === 'test' ? new EPGGrabberMock() : new EPGGrabber()
   }
 
   async grab(): Promise<{ channels: Collection; programs: Collection }> {
@@ -36,6 +35,7 @@ export class Grabber {
         taskQueue.wrap(
           async (queueItem: { channel: Channel; config: SiteConfig; date: string }) => {
             const { channel, config, date } = queueItem
+            const grabber = process.env.NODE_ENV === 'test' ? new EPGGrabberMock(config) : new EPGGrabber(config)
 
             channels.add(channel)
 
@@ -49,10 +49,9 @@ export class Grabber {
               config.delay = delay
             }
 
-            const _programs = await this.grabber.grab(
+            const _programs = await grabber.grab(
               channel,
               date,
-              config,
               (data: GrabCallbackData, error: Error | null) => {
                 const { programs, date } = data
 

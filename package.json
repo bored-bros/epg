@@ -65,6 +65,7 @@
     "lodash": "^4.17.21",
     "luxon": "^3.3.0",
     "markdown-include": "^0.4.3",
+    "minio": "^8.0.2",
     "mockdate": "^3.0.5",
     "nedb-promises": "^6.0.3",
     "node-cleanup": "^2.1.2",
