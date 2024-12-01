@@ -1,15 +1,19 @@
-import Minio from 'minio'
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Storage } from '@freearhey/core'
 
-export class MinioStorage extends Storage {
-  private client: Minio.Client
+export class S3Storage extends Storage {
+  private client: S3Client
 
   constructor() {
     super()
-    this.client = new Minio.Client({
-      endPoint: process.env.MINIO_ENDPOINT!,
-      accessKey: process.env.MINIO_ACCESS_KEY!,
-      secretKey: process.env.MINIO_SECRET_KEY!
+    this.client = new S3Client({
+      forcePathStyle: true,
+      region: process.env.S3_REGION!,
+      endpoint: process.env.S3_ENDPOINT!,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY!,
+        secretAccessKey: process.env.S3_ACCESS_SECRET!,
+      }
     })
   }
 
@@ -19,27 +23,12 @@ export class MinioStorage extends Storage {
     const objectName = objectParts.join('/')
     const buffer = Buffer.from(content)
 
-    let contentType = 'application/octet-stream'
-
-    switch(true) {
-      case filepath.endsWith('.gz'):
-      case filepath.endsWith('.gzip'): 
-        contentType = 'application/gzip'
-        break
-      case filepath.endsWith('.json'):
-        contentType = 'application/json'
-        break
-      case filepath.endsWith('.xml'): 
-        contentType = 'application/xml'
-        break
-      default:
-        throw new Error('Invalid file extension.')
-    }
-
-    const metaData = {
-      'Content-Type': contentType
-    }
-
-    await this.client.putObject(bucket, objectName, buffer, buffer.length, metaData)
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: objectName,
+        Body: buffer,
+      })
+    )
   }
 }

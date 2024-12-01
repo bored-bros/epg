@@ -1,7 +1,11 @@
-import { Collection, DateTime, Logger, StringTemplate } from '@freearhey/core'
+import { Collection, Logger, StringTemplate } from '@freearhey/core'
 import { OptionValues } from 'commander'
 import { Channel, Program } from 'epg-grabber'
 import { Guide } from '.'
+import dayjs from 'dayjs'
+import weekOfYear from 'dayjs/plugin/weekOfYear'
+
+dayjs.extend(weekOfYear)
 
 type GuideManagerProps = {
   options: OptionValues
@@ -25,18 +29,18 @@ export class GuideManager {
 
   async createGuides() {
     const pathTemplate = new StringTemplate(this.options.output)
-    const currDate = new DateTime(process.env.CURR_DATE || new Date().toISOString(), { zone: 'UTC' })
 
     const groupedChannels = this.channels
       .orderBy([(channel: Channel) => channel.xmltv_id])
       .uniqBy((channel: Channel) => `${channel.xmltv_id}:${channel.site}:${channel.lang}`)
       .groupBy((channel: Channel) => {
-        return pathTemplate.format({ lang: channel.lang || 'en', site: channel.site || '', id: channel.xmltv_id || '' })
+        return pathTemplate.format({ lang: channel.lang || 'en', site: channel.site || '', channel: channel.xmltv_id || '' })
       })
 
     const groupedPrograms = this.programs
       .orderBy([(program: Program) => program.channel, (program: Program) => program.start])
       .groupBy((program: Program) => {
+        const date = this.options.date.toJSDate()
         const lang =
           program.titles && program.titles.length && program.titles[0].lang
             ? program.titles[0].lang
@@ -45,9 +49,10 @@ export class GuideManager {
           lang: lang, 
           site: program.site || '', 
           channel: program.channel || '', 
-          day: currDate.toJSDate().getDay(),
-          month: currDate.toJSDate().getMonth()+1,
-          year: currDate.toJSDate().getFullYear()
+          day: date.getDate(),
+          month: date.getMonth()+1,
+          year: date.getFullYear(),
+          week: dayjs(date).week()
         })
       })
 
@@ -56,7 +61,7 @@ export class GuideManager {
         filepath: groupKey,
         channels: new Collection(groupedChannels.get(groupKey)),
         programs: new Collection(groupedPrograms.get(groupKey)),
-        date: currDate,
+        date: this.options.date,
         logger: this.logger
       })
 

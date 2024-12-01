@@ -1,7 +1,7 @@
 import { Collection, Logger, DateTime, Storage, Zip } from '@freearhey/core'
 import { Channel } from 'epg-grabber'
 import { XMLTV } from '../core'
-import { MinioStorage } from './storage'
+import { S3Storage } from './storage'
 
 type GuideProps = {
   channels: Collection
@@ -25,7 +25,7 @@ export class Guide {
     this.date = date
     this.logger = logger
     this.filepath = filepath
-    this.storage = filepath.startsWith('s3://') ? new MinioStorage() : new Storage()
+    this.storage = filepath.startsWith('s3://') ? new S3Storage() : new Storage()
   }
 
   async save() {

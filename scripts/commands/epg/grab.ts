@@ -5,6 +5,7 @@ import { QueueCreator, Job, ChannelsParser } from '../../core'
 import { Channel } from 'epg-grabber'
 import path from 'path'
 import { SITES_DIR } from '../../constants'
+import { DateTime } from '@freearhey/core'
 
 program
   .option('-s, --site <name>', 'Name of the site to parse')
@@ -17,9 +18,16 @@ program
   .option('-t, --timeout <milliseconds>', 'Override the default timeout for each request')
   .option('-d, --delay <milliseconds>', 'Override the default delay between request')
   .option(
+    '--date <date>',
+    'Start date for program loading (defaults to current date, format: YYYY-MM-DD)',
+    value => new DateTime(value, { zone: 'UTC' }),
+    new DateTime(new Date().toISOString(), { zone: 'UTC' })
+  )
+  .option(
     '--days <days>',
     'Override the number of days for which the program will be loaded (defaults to the value from the site config)',
-    value => parseInt(value)
+    value => parseInt(value),
+    1
   )
   .option(
     '--maxConnections <number>',
@@ -28,9 +36,6 @@ program
     1
   )
   .option('--cron <expression>', 'Schedule a script run (example: "0 0 * * *")')
-  // .option('--xml', 'Create a XML version of the guide', true)
-  // .option('--json', 'Create a JSON version of the guide', false)
-  // .option('--gzip', 'Create a compressed version of the guide', false)
   .parse(process.argv)
 
 export type GrabOptions = {
@@ -41,7 +46,8 @@ export type GrabOptions = {
   timeout?: string
   delay?: string
   lang?: string
-  days?: number
+  date: DateTime
+  days: number
   cron?: string
 }
 

@@ -55,7 +55,7 @@ export class QueueCreator {
       }
 
       const days = this.options.days || config.days || 1
-      const currDate = new DateTime(process.env.CURR_DATE || new Date().toISOString())
+      const currDate = this.options.date
       const dates = Array.from({ length: days }, (_, day) => currDate.add(day, 'd'))
       dates.forEach((date: DateTime) => {
         const dateString = date.toJSON()

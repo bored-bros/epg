@@ -1,5 +1,6 @@
 {
   "name": "epg",
+  "version": "0.0.1",
   "scripts": {
     "act:update": "act workflow_dispatch -W .github/workflows/update.yml",
     "api:load": "npx tsx scripts/commands/api/load.ts",
@@ -28,6 +29,7 @@
   },
   "dependencies": {
     "@alex_neo/jest-expect-message": "^1.0.5",
+    "@aws-sdk/client-s3": "^3.701.0",
     "@freearhey/core": "^0.3.1",
     "@freearhey/search-js": "^0.1.1",
     "@octokit/core": "^4.1.0",
@@ -65,7 +67,6 @@
     "lodash": "^4.17.21",
     "luxon": "^3.3.0",
     "markdown-include": "^0.4.3",
-    "minio": "^8.0.2",
     "mockdate": "^3.0.5",
     "nedb-promises": "^6.0.3",
     "node-cleanup": "^2.1.2",
