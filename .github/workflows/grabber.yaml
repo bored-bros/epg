@@ -1,0 +1,63 @@
+name: EPG Grabber
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to grab (Glob Pattern: *, {sit1,site2} ...)'
+        required: true
+        default: '{beinsports.com,sat.tv,shahid.mbc.net,canalplus.com}'
+      days:
+        description: 'Number of days to grab'
+        required: true
+        default: '1'
+        type: choice
+        options:
+          - '1'
+          - '2'
+          - '3'
+          - '7'
+      date:
+        description: 'Start date (YYYY-MM-DD format, defaults to today)'
+        required: false
+        type: string
+  schedule:
+    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
+
+jobs:
+  grab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm install
+          npm postinstall
+      
+      - name: Get current date
+        if: inputs.date == ''
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+          format: "YYYY-MM-DD"
+        
+      - name: Run EPG grabber
+        env:
+          S3_ENDPOINT: https://oboyvbpfsemflqoiqpnr.supabase.co/storage/v1/s3
+          S3_REGION: eu-west-3
+          S3_ACCESS_KEY: 12ce4bc2400cc94bda5f7a9c4452515d
+          S3_ACCESS_SECRET: 644659ce59c5d9331defc57b3b6ac3459c829984739d800d71ad7d7837e6aac7
+        run: |
+          npm run grab -- \
+            --site=${{ inputs.site }} \
+            --days=${{ inputs.days }} \
+            --date=${{ inputs.date || steps.date.outputs.time }} \
+            --output=s3://epg-data/site={site}/channel={channel}/year={year}/month={month}/day={day}/lang={lang}/guide.xml \
+            --maxConnections=100

@@ -40,7 +40,7 @@ export class GuideManager {
     const groupedPrograms = this.programs
       .orderBy([(program: Program) => program.channel, (program: Program) => program.start])
       .groupBy((program: Program) => {
-        const date = this.options.date.toJSDate()
+        const date = new Date(program.start)
         const lang =
           program.titles && program.titles.length && program.titles[0].lang
             ? program.titles[0].lang

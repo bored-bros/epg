@@ -36,7 +36,7 @@ export class QueueCreator {
 
     const queue = new Queue()
     for (const channel of this.parsedChannels.all() as Channel[]) {
-      if (!channel.site || !channel.site_id || !channel.name) continue
+      if (!channel.site || !channel.site_id || !channel.name || !channel.xmltv_id) continue
       if (this.options.lang && channel.lang !== this.options.lang) continue
 
       const configPath = path.resolve(SITES_DIR, `${channel.site}/${channel.site}.config.js`)
