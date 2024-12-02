@@ -60,7 +60,6 @@ export class Grabber {
                       channel.xmltv_id
                     } - ${date.format('MMM D, YYYY')} (ERROR)`
                   )
-                  this.logger.debug(`    ERR: ${error.message}`)
                 } else {
                   this.logger.info(
                     `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
