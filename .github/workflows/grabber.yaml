@@ -55,8 +55,9 @@ jobs:
           S3_ACCESS_SECRET: 644659ce59c5d9331defc57b3b6ac3459c829984739d800d71ad7d7837e6aac7
         run: |
           npm run grab -- \
-            --site=${{ inputs.site }} \
+            --site="${{ inputs.site }}" \
             --days=${{ inputs.days }} \
             --date=${{ inputs.date || steps.date.outputs.time }} \
             --output=s3://epg-data/site={site}/channel={channel}/year={year}/month={month}/day={day}/lang={lang}/guide.xml \
+            --delay=1000
             --maxConnections=20
