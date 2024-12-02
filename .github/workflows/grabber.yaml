@@ -59,4 +59,4 @@ jobs:
             --days=${{ inputs.days }} \
             --date=${{ inputs.date || steps.date.outputs.time }} \
             --output=s3://epg-data/site={site}/channel={channel}/year={year}/month={month}/day={day}/lang={lang}/guide.xml \
-            --maxConnections=100
+            --maxConnections=20

@@ -54,17 +54,21 @@ export class Grabber {
               date,
               (data: GrabCallbackData, error: Error | null) => {
                 const { programs, date } = data
-
-                this.logger.info(
-                  `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
-                    channel.xmltv_id
-                  } - ${date.format('MMM D, YYYY')} (${programs.length} programs)`
-                )
-                if (i < total) i++
-
                 if (error) {
-                  this.logger.info(`    ERR: ${error.message}`)
+                  this.logger.info(
+                    `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
+                      channel.xmltv_id
+                    } - ${date.format('MMM D, YYYY')} (ERROR)`
+                  )
+                  this.logger.debug(`    ERR: ${error.message}`)
+                } else {
+                  this.logger.info(
+                    `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
+                      channel.xmltv_id
+                    } - ${date.format('MMM D, YYYY')} (${programs.length} programs)`
+                  )
                 }
+                if (i < total) i++
               }
             )
 
