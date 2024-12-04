@@ -7,6 +7,7 @@ dayjs.extend(utc)
 module.exports = {
   site: 'canalplus.com',
   days: 2,
+  delay: 1000,
   url: async function ({ channel, date }) {
     const [region, site_id] = channel.site_id.split('#')
     const data = await axios

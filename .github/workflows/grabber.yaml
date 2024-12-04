@@ -21,6 +21,12 @@ on:
         description: 'Start date (YYYY-MM-DD format, defaults to today)'
         required: false
         type: string
+      maxConnections:
+        required: false
+        default: '100'
+      delay:
+        required: true
+        default: '0'
   schedule:
     - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
 
@@ -59,4 +65,5 @@ jobs:
             --days=${{ inputs.days }} \
             --date=${{ inputs.date || steps.date.outputs.time }} \
             --output=s3://epg-data/site={site}/channel={channel}/year={year}/month={month}/day={day}/lang={lang}/guide.xml \
-            --maxConnections=20
+            --maxConnections=${{ inputs.maxConnections }} \
+            --delay=${{ inputs.delay }}
