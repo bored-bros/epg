@@ -1,4 +1,4 @@
-import { EPGGrabber, GrabCallbackData, EPGGrabberMock, SiteConfig, Channel } from 'epg-grabber'
+import { EPGGrabber, GrabCallbackData, EPGGrabberMock, SiteConfig, Channel, Program } from 'epg-grabber'
 import { Logger, Collection } from '@freearhey/core'
 import { Queue } from './'
 import { GrabOptions } from '../commands/epg/grab'
@@ -37,7 +37,6 @@ export class Grabber {
             const { channel, config, date } = queueItem
             const grabber = process.env.NODE_ENV === 'test' ? new EPGGrabberMock(config) : new EPGGrabber(config)
 
-            channels.add(channel)
 
             if (this.options.timeout !== undefined) {
               const timeout = parseInt(this.options.timeout)
@@ -49,29 +48,61 @@ export class Grabber {
               config.delay = delay
             }
 
-            const _programs = await grabber.grab(
-              channel,
-              date,
-              (data: GrabCallbackData, error: Error | null) => {
-                const { programs, date } = data
-                if (error) {
-                  this.logger.info(
-                    `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
-                      channel.xmltv_id
-                    } - ${date.format('MMM D, YYYY')} (ERROR)`
+            try {
+              let retryCount = 0
+              let success = false
+              let _programs
+              
+              while (!success && retryCount < 2) {
+                try {
+                  _programs = await grabber.grab(
+                    channel,
+                    date,
+                    (data: GrabCallbackData, error: Error | null) => {
+                      const { programs, date } = data
+                      if (error) {
+                        this.logger.info(
+                          `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
+                            channel.xmltv_id
+                          } - ${date.format('MMM D, YYYY')} (ERROR)`
+                        )
+                      } else {
+                        this.logger.info(
+                          `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
+                            channel.xmltv_id
+                          } - ${date.format('MMM D, YYYY')} (${programs.length} programs)`
+                        )
+                      }
+                    }
                   )
-                } else {
-                  this.logger.info(
-                    `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
-                      channel.xmltv_id
-                    } - ${date.format('MMM D, YYYY')} (${programs.length} programs)`
-                  )
+                  success = true
+                } catch (error) {
+                  retryCount++
+                  if (retryCount < 2) {
+                    this.logger.info(
+                      `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
+                        channel.xmltv_id
+                      } - ${date} (ERROR) - Retrying later...`
+                    )
+                    await new Promise(resolve => setTimeout(resolve, 10000))
+                  } else {
+                    this.logger.info(
+                      `  [${i}/${total}] ${channel.site} (${channel.lang}) - ${
+                        channel.xmltv_id
+                      } - ${date} (ERROR) - Max retries reached`
+                    )
+                    this.logger.debug(error)
+                  }
                 }
-                if (i < total) i++
               }
-            )
-
-            programs = programs.concat(new Collection(_programs))
+              
+              if (success) {
+                channels.add(channel)
+                programs = programs.concat(new Collection(_programs))
+              }
+            } finally {
+              if (i < total) i++
+            }
           }
         )
       )

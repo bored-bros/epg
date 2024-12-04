@@ -61,7 +61,6 @@ export class Guide {
       guideContent = xmltv.toString()
     }
 
-    this.logger.info(`  saving guide to "${this.filepath}"...`)
     if (isGzip) {
       const zip = new Zip()
       await this.storage.save(this.filepath, await zip.compress(guideContent))

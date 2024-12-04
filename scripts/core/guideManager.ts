@@ -4,6 +4,7 @@ import { Channel, Program } from 'epg-grabber'
 import { Guide } from '.'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
+import { PromisyClass, TaskQueue } from 'cwait'
 
 dayjs.extend(weekOfYear)
 
@@ -34,7 +35,11 @@ export class GuideManager {
       .orderBy([(channel: Channel) => channel.xmltv_id])
       .uniqBy((channel: Channel) => `${channel.xmltv_id}:${channel.site}:${channel.lang}`)
       .groupBy((channel: Channel) => {
-        return pathTemplate.format({ lang: channel.lang || 'en', site: channel.site || '', channel: channel.xmltv_id || '' })
+        return pathTemplate.format({ 
+          lang: channel.lang || 'en', 
+          site: channel.site || '', 
+          channel: channel.xmltv_id || '' 
+        })
       })
 
     const groupedPrograms = this.programs
@@ -56,16 +61,29 @@ export class GuideManager {
         })
       })
 
-    for (const groupKey of groupedPrograms.keys()) {
-      const guide = new Guide({
-        filepath: groupKey,
-        channels: new Collection(groupedChannels.get(groupKey)),
-        programs: new Collection(groupedPrograms.get(groupKey)),
-        date: this.options.date,
-        logger: this.logger
-      })
+    const taskQueue = new TaskQueue(Promise as PromisyClass, this.options.maxConnections)
+    const total = groupedPrograms.keys().length
+    let i = 1
 
-      await guide.save()
-    }
+    await Promise.all(
+      groupedPrograms.keys().map(
+        taskQueue.wrap(
+          async (groupKey: string) => {
+            const guide = new Guide({
+              filepath: groupKey,
+              channels: new Collection(groupedChannels.get(groupKey)),
+              programs: new Collection(groupedPrograms.get(groupKey)),
+              date: this.options.date,
+              logger: this.logger
+            })
+            await guide.save()
+            this.logger.info(
+              `  [${i}/${total}] saving to ${groupKey}`
+            )
+            if (i < total) i++
+          }
+        )
+      )
+    )
   }
 }
