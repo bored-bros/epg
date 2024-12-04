@@ -22,8 +22,8 @@ on:
         required: false
         type: string
       maxConnections:
-        required: false
-        default: '100'
+        required: true
+        default: '5'
       delay:
         required: true
         default: '0'
