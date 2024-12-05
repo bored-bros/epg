@@ -61,9 +61,9 @@ jobs:
           S3_ACCESS_SECRET: ${{ secrets.S3_ACCESS_SECRET }}
         run: |
           npm run grab -- \
-            --site="${{ inputs.site }}" \
-            --days=${{ inputs.days }} \
+            --site="${{ inputs.site || '{beinsports.com,sat.tv,shahid.mbc.net,canalplus.com}'  }}" \
+            --days=${{ inputs.days || '2' }} \
             --date=${{ inputs.date || steps.date.outputs.time }} \
             --output=s3://epg-data/site={site}/channel={channel}/year={year}/month={month}/day={day}/lang={lang}/guide.xml \
-            --maxConnections=${{ inputs.maxConnections }} \
-            --delay=${{ inputs.delay }}
+            --maxConnections=${{ inputs.maxConnections || '5' }} \
+            --delay=${{ inputs.delay || '0' }}
