@@ -80,16 +80,18 @@ export class Guide {
     if (isJson || isJsonLines) {
       const xml2js = require('xml2js')
       const result = await xml2js.parseStringPromise(xmltv.toString(), {mergeAttrs: true, explicitArray: false, trim: true, normalize: true})
-      const programs: Array<{[key: string]: unknown}> = result.tv.programme
-      programs.forEach(program => {
-        program.title = program.title?._
-        program.desc = program.desc?._
-        program.category = program.category?._
-      })
       if (isJsonLines) {
-        guideContent = programs.map(program => JSON.stringify(program, null, 2)).join('\n')
+        const programs: Array<{[key: string]: unknown}> = result.tv.programme
+        guideContent= programs.map(program => {
+          program.date = result.tv.date
+          program.channel = result.tv.channel.id
+          program.title = program.title?._
+          program.desc = program.desc?._
+          program.category = program.category?._
+          return JSON.stringify(program, null, 2)
+        }).join('\n')
       } else {
-        guideContent = JSON.stringify(programs, null, 2)
+        guideContent = JSON.stringify(result.tv, null, 2)
       }
     }
 
