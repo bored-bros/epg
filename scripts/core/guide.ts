@@ -43,26 +43,25 @@ export class Guide {
     let guideContent = ''
     let isXml = false
     let isJson = false
-    let isGzip = false
+    let isJsonLines = false
+    let isCompressed = false
 
     // Get file extension and handle different cases
     const filepath = this.filepath.toLowerCase()
-    switch(true) {
-      case filepath.endsWith('.xml'):
+    isCompressed = filepath.endsWith('.gz') || filepath.endsWith('.gzip')
+    const extension = isCompressed 
+      ? filepath.replace(/\.(gz|gzip)$/, '').split('.').pop()
+      : filepath.split('.').pop()
+
+    switch (extension) {
+      case 'xml':
         isXml = true
         break
-      case filepath.endsWith('.json'):
+      case 'json':
         isJson = true
         break
-      case filepath.endsWith('.xml.gz'):
-      case filepath.endsWith('.xml.gzip'): 
-        isXml = true
-        isGzip = true
-        break
-      case filepath.endsWith('.json.gz'):
-      case filepath.endsWith('.json.gzip'): 
-        isJson = true
-        isGzip = true
+      case 'jsonl':
+        isJsonLines = true
         break
       default:
         throw new Error('Invalid file extension. Only {xml,json} or {xml,json}.{gz,gzip} are supported')
@@ -78,13 +77,23 @@ export class Guide {
       guideContent = xmltv.toString()
     }
 
-    if (isJson) {
+    if (isJson || isJsonLines) {
       const xml2js = require('xml2js')
       const result = await xml2js.parseStringPromise(xmltv.toString(), {mergeAttrs: true, explicitArray: false, trim: true, normalize: true})
-      guideContent = JSON.stringify(result.tv, null, 2)
+      const programs: Array<{[key: string]: unknown}> = result.tv.programme
+      programs.forEach(program => {
+        program.title = program.title?._
+        program.desc = program.desc?._
+        program.category = program.category?._
+      })
+      if (isJsonLines) {
+        guideContent = programs.map(program => JSON.stringify(program, null, 2)).join('\n')
+      } else {
+        guideContent = JSON.stringify(programs, null, 2)
+      }
     }
 
-    if (isGzip) {
+    if (isCompressed) {
       const zip = new Zip()
       await this.storage.save(this.filepath, await zip.compress(guideContent))
     } else {
