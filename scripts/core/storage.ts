@@ -3,9 +3,11 @@ import { Storage } from '@freearhey/core'
 
 export class S3Storage extends Storage {
   private client: S3Client
+  private rootPath: string
 
-  constructor() {
+  constructor(rootPath?: string) {
     super()
+    this.rootPath = rootPath || ''
     this.client = new S3Client({
       forcePathStyle: true,
       region: process.env.S3_REGION!,
@@ -20,7 +22,7 @@ export class S3Storage extends Storage {
   async save(filepath: string, content: ArrayBuffer) {
     const s3Path = filepath.replace('s3://', '')
     const [bucket, ...objectParts] = s3Path.split('/')
-    const objectName = objectParts.join('/')
+    const objectName = this.rootPath ? `${this.rootPath}/${objectParts.join('/')}` : objectParts.join('/')
     const buffer = Buffer.from(content)
 
     await this.client.send(
