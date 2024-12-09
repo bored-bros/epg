@@ -3,6 +3,7 @@ import { ChannelsParser } from '../../core'
 import path from 'path'
 import { SITES_DIR, API_DIR } from '../../constants'
 import { Channel } from 'epg-grabber'
+import { S3Storage } from '../../core/storage'
 
 type OutputItem = {
   channel: string | null
@@ -41,9 +42,10 @@ async function main() {
     }
   })
 
-  const apiStorage = new Storage(API_DIR)
-  const outputFilename = 'guides.json'
-  await apiStorage.save('guides.json', output.toJSON())
+  const apiStorage = API_DIR.startsWith('s3://') ? new S3Storage() : new Storage(API_DIR)
+  const outputFilename = 'guides.jsonl'
+  const outputContent = output.map(item => JSON.stringify(item)).join('\n')
+  await apiStorage.save(outputFilename, outputContent)
 
   logger.info(`saved to "${path.join(API_DIR, outputFilename)}"`)
 }
