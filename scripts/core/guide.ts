@@ -12,12 +12,6 @@ type GuideProps = {
   filepath: string
 }
 
-function nameToUpperCase(value, name){
-  console.log(value)
-  console.log(name)
-  return name
-}
-
 export class Guide {
   channels: Collection
   programs: Collection
@@ -77,22 +71,27 @@ export class Guide {
       guideContent = xmltv.toString()
     }
 
-    if (isJson || isJsonLines) {
+    if (isJsonLines) {
+      // const programs: Array<{[key: string]: unknown}> = result.tv.programme
+      guideContent= this.programs.map(program => {
+        program.date = this.date.format('yyyy-mm-dd')
+        program.title = program.titles[0]?.value
+        program.epgLang = program.titles[0]?.lang
+        delete program.titles
+        program.subtitle = program.subTitles[0]?.value
+        delete program.subTitles
+        program.description = program.descriptions[0]?.value
+        delete program.descriptions
+        program.category = program.categories[0]?.value
+        delete program.categories
+        return JSON.stringify(program, null, 2)
+      }).join('\n')
+    }
+
+    if (isJson) {
       const xml2js = require('xml2js')
       const result = await xml2js.parseStringPromise(xmltv.toString(), {mergeAttrs: true, explicitArray: false, trim: true, normalize: true})
-      if (isJsonLines) {
-        const programs: Array<{[key: string]: unknown}> = result.tv.programme
-        guideContent= programs.map(program => {
-          program.date = result.tv.date
-          program.channel = result.tv.channel.id
-          program.title = program.title?._
-          program.desc = program.desc?._
-          program.category = program.category?._
-          return JSON.stringify(program, null, 2)
-        }).join('\n')
-      } else {
-        guideContent = JSON.stringify(result.tv, null, 2)
-      }
+      guideContent = JSON.stringify(result.tv, null, 2)
     }
 
     if (isCompressed) {
