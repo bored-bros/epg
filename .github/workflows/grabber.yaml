@@ -58,7 +58,7 @@ jobs:
         with:
           format: "YYYY-MM-DD"
       
-      - name: Run EPG grabber
+      - name: Parse sites
         env:
           API_DIR: s3://epg-data
         run: npm run api:generate

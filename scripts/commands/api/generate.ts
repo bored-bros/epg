@@ -42,12 +42,12 @@ async function main() {
     }
   })
 
-  const apiStorage = API_DIR.startsWith('s3://') ? new S3Storage() : new Storage(API_DIR)
-  const outputFilename = 'guides.jsonl'
+  const apiStorage = API_DIR.startsWith('s3://') ? new S3Storage() : new Storage()
+  const outputFilename = `${API_DIR}/guides.jsonl`
   const outputContent = output.map(item => JSON.stringify(item)).join('\n')
   await apiStorage.save(outputFilename, outputContent)
 
-  logger.info(`saved to "${path.join(API_DIR, outputFilename)}"`)
+  logger.info(`saved to "${outputFilename}"`)
 }
 
 main()
