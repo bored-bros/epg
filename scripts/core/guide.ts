@@ -76,7 +76,7 @@ export class Guide {
       guideContent= this.programs.map(program => {
         program.date = this.date.format('yyyy-mm-dd')
         program.title = program.titles[0]?.value
-        program.epgLang = program.titles[0]?.lang
+        program.lang = program.titles[0]?.lang
         delete program.titles
         program.subtitle = program.subTitles[0]?.value
         delete program.subTitles
