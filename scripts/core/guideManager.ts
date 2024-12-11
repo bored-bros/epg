@@ -53,7 +53,8 @@ export class GuideManager {
         return pathTemplate.format({ 
           lang: lang, 
           site: program.site || '', 
-          channel: program.channel || '', 
+          channel: program.channel || '',
+          date: dayjs(date).format('YYYYMMDD'),
           day: date.getDate(),
           month: date.getMonth()+1,
           year: date.getFullYear(),
