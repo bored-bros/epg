@@ -3,6 +3,7 @@ import { Channel } from 'epg-grabber'
 import { XMLTV } from '../core'
 import { S3Storage } from './storage'
 import 'xml2js'
+import dayjs from 'dayjs'
 
 type GuideProps = {
   channels: Collection
@@ -74,8 +75,7 @@ export class Guide {
     if (isJsonLines) {
       // const programs: Array<{[key: string]: unknown}> = result.tv.programme
       guideContent= this.programs.map(program => {
-        program.date = this.date.format('yyyy-mm-dd')
-        program.title = program.titles[0]?.value
+        program.date = dayjs(program.start).format('YYYY-MM-DD')
         program.lang = program.titles[0]?.lang
         delete program.titles
         program.subtitle = program.subTitles[0]?.value

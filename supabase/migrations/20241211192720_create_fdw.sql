@@ -13,3 +13,16 @@ create server epg_bucket
     endpoint_url 'https://oboyvbpfsemflqoiqpnr.supabase.co/storage/v1/s3',
     path_style_url 'true'
   );
+
+create foreign table sites (
+  channel text,
+  site text,
+  site_id text,
+  site_name text,
+  lang text
+)
+  server epg_bucket
+  options (
+    uri 's3://epg-data/guides.jsonl',
+    format 'jsonl'
+  );
