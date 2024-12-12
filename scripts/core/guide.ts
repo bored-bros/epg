@@ -84,7 +84,7 @@ export class Guide {
         delete program.descriptions
         program.category = program.categories[0]?.value
         delete program.categories
-        return JSON.stringify(program, null, 2)
+        return JSON.stringify(program)
       }).join('\n')
     }
 
