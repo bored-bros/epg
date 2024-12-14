@@ -45,7 +45,7 @@ export class GuideManager {
     const groupedPrograms = this.programs
       .orderBy([(program: Program) => program.channel, (program: Program) => program.start])
       .groupBy((program: Program) => {
-        const date = new Date(program.start)
+        const date = dayjs(program.start)
         const lang =
           program.titles && program.titles.length && program.titles[0].lang
             ? program.titles[0].lang
@@ -54,11 +54,11 @@ export class GuideManager {
           lang: lang, 
           site: program.site || '', 
           channel: program.channel || '',
-          date: dayjs(date).format('YYYYMMDD'),
-          day: date.getDate(),
-          month: date.getMonth()+1,
-          year: date.getFullYear(),
-          week: dayjs(date).week()
+          date: date.format('YYYYMMDD'),
+          day: date.daysInMonth(),
+          month: date.month(),
+          year: date.year(),
+          week: date.week()
         })
       })
 

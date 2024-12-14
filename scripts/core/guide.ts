@@ -62,20 +62,32 @@ export class Guide {
         throw new Error('Invalid file extension. Only {xml,json} or {xml,json}.{gz,gzip} are supported')
     }
 
-    const xmltv = new XMLTV({
-      channels: channels,
-      programs: this.programs,
-      date: this.date
-    })
-
     if (isXml) {
+      const xmltv = new XMLTV({
+        channels: channels,
+        programs: this.programs,
+        date: this.date
+      })
       guideContent = xmltv.toString()
+    }
+
+    if (isJson) {
+      const xml2js = require('xml2js')
+      const xmltv = new XMLTV({
+        channels: channels,
+        programs: this.programs,
+        date: this.date
+      })
+      const result = await xml2js.parseStringPromise(xmltv.toString(), {mergeAttrs: true, explicitArray: false, trim: true, normalize: true})
+      guideContent = JSON.stringify(result.tv, null, 2)
     }
 
     if (isJsonLines) {
       // const programs: Array<{[key: string]: unknown}> = result.tv.programme
       guideContent= this.programs.map(program => {
-        program.date = dayjs(program.start).format('YYYY-MM-DD')
+        program.date = this.date.toJSON()
+        program.start = dayjs(program.start).toJSON()
+        program.stop = dayjs(program.stop).toJSON()
         program.lang = program.titles[0]?.lang
         delete program.titles
         program.subtitle = program.subTitles[0]?.value
@@ -86,12 +98,6 @@ export class Guide {
         delete program.categories
         return JSON.stringify(program)
       }).join('\n')
-    }
-
-    if (isJson) {
-      const xml2js = require('xml2js')
-      const result = await xml2js.parseStringPromise(xmltv.toString(), {mergeAttrs: true, explicitArray: false, trim: true, normalize: true})
-      guideContent = JSON.stringify(result.tv, null, 2)
     }
 
     if (isCompressed) {
