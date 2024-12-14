@@ -1,6 +1,5 @@
 import { Logger, Storage, Collection } from '@freearhey/core'
 import { ChannelsParser } from '../../core'
-import path from 'path'
 import { SITES_DIR, API_DIR } from '../../constants'
 import { Channel } from 'epg-grabber'
 import { S3Storage } from '../../core/storage'
@@ -32,22 +31,24 @@ async function main() {
 
   logger.info(`  found ${parsedChannels.count()} channel(s)`)
 
-  const output = parsedChannels.map((channel: Channel): OutputItem => {
-    return {
-      channel: channel.xmltv_id || null,
-      site: channel.site || '',
-      site_id: channel.site_id || '',
-      site_name: channel.name,
-      lang: channel.lang || ''
-    }
-  })
+  const output = parsedChannels
+    .filter((channel: Channel) => channel.xmltv_id)
+    .map((channel: Channel): OutputItem => {
+      return {
+        channel: channel.xmltv_id || null,
+        site: channel.site || '',
+        site_id: channel.site_id || '',
+        site_name: channel.name,
+        lang: channel.lang || ''
+      }
+    })
 
   const apiStorage = API_DIR.startsWith('s3://') ? new S3Storage() : new Storage()
   const outputFilename = `${API_DIR}/guides.jsonl`
   const outputContent = output.map(item => JSON.stringify(item)).join('\n')
   await apiStorage.save(outputFilename, outputContent)
 
-  logger.info(`saved to "${outputFilename}"`)
+  logger.info(`saved ${output.count()} channel to "${outputFilename}"`)
 }
 
 main()
