@@ -28,7 +28,9 @@ module.exports = {
       })
       const f = dt => dayjs.tz(dt, tz).isSame(date, 'day')
       schedules
-        .filter(entry => entry.parentId === channel.site_id && (f(entry.startTime) || f(entry.endTime)))
+        .filter(
+          entry => entry.parentId === channel.site_id && (f(entry.startTime) || f(entry.endTime))
+        )
         .forEach(entry => {
           const [, , , season, , , session2, , , episode] = entry.tvProgram.match(
             /((\s(\d+)[a-zA-Z]{2})?\s(Season(\s)?||S)(\d+)?)?(\s-\sEps\.(\s)?(\d+))/
@@ -55,13 +57,15 @@ module.exports = {
       .catch(console.error)
 
     if (Array.isArray(data?.videos)) {
-      channels.push(...data.videos
-        .filter(item => item?.contentType === 'Channel')
-        .map(item => ({
-          lang: 'id',
-          site_id: item.id,
-          name: item.translations.id.title
-        })))
+      channels.push(
+        ...data.videos
+          .filter(item => item?.contentType === 'Channel')
+          .map(item => ({
+            lang: 'id',
+            site_id: item.id,
+            name: item.translations.id.title
+          }))
+      )
     }
 
     return channels

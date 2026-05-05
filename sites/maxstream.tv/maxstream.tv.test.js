@@ -10,14 +10,11 @@ const date = dayjs.utc('2026-05-02').startOf('d')
 const channel = { site_id: '0_86sal99e' }
 
 it('can generate valid url', () => {
-  expect(url({ channel })).toBe(
-    'https://vmp.maxstream.tv/api/v3/videos/0_86sal99e/schedules'
-  )
+  expect(url({ channel })).toBe('https://vmp.maxstream.tv/api/v3/videos/0_86sal99e/schedules')
 })
 
 it('can parse response', () => {
-  const content = fs.readFileSync(path.resolve(__dirname, '__data__/content.json'))
-    .toString()
+  const content = fs.readFileSync(path.resolve(__dirname, '__data__/content.json')).toString()
   const results = parser({ content, channel, date }).map(p => {
     p.start = p.start.toJSON()
     p.stop = p.stop.toJSON()
@@ -26,7 +23,7 @@ it('can parse response', () => {
 
   expect(results.length).toBe(49)
   expect(results[0]).toMatchObject({
-    title: 'I\'ll Become A Villainess Who Goes Down In History - Eps.12',
+    title: "I'll Become A Villainess Who Goes Down In History - Eps.12",
     description:
       'Seorang gadis bereinkarnasi sebagai tokoh antagonis dalam novel fantasi. Ia bertekad menjadi villain sejati, namun pilihan tindakannya justru mengubah jalan cerita dan memengaruhi hubungan dengan karakter lain.',
     start: '2026-05-01T16:30:00.000Z',
